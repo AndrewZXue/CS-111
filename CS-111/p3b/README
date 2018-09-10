@@ -1,0 +1,26 @@
+
+This project is written with python
+
+This tarball contains 3 files:
+lab3b.py: the source file of this program
+Makefile: the makefile of the program
+README: this file
+
+lab3b.py: 
+	takes in a file system (described by a .csv file), detects and print out the inconsistency.
+	data structures used: mainly dictionaries and lists
+
+	privilege of dictionaries: easy to keep track of the data - match the label with data
+	Some 2d dictionaries are used as an array of dictionaries
+
+	privilege of list: when I try to define if a piece of data exists in a group, 
+	I prefer lists. (No need to match label with data)
+
+Makefile:
+	contains 3 targets:
+	default: create lab3b based on lab3b.py
+	clean: clean generated files
+	dist: create the tarball file
+
+README:
+	this file

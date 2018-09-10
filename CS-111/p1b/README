@@ -1,0 +1,42 @@
+This Tarball contians 3 files. Four source files: lab1b-client.c, lab1b-service.c, and Makefile;
+1 my.key file used for encryption and decryption;
+and this README file.
+
+lab1b-clinet.c
+This file is in charge of
+1. setting and restoring terminal mode
+	set_input_mode()
+	reset_input_mode()
+2. setup socket to reach the server
+	at the beginnig of main()
+3. collecting input from the keyboard, and sending it to the server through socket
+	main()
+4. encrypt and decrypt the data for socket transportation
+	encryption_init()
+5. display the output from server
+
+lab1b-server.c
+This file is in charge of 
+1. accepting connection request of client
+	at the beginning of main -- accept() & bind()
+2. parent and child process to run a shell
+	same feature as lab1a
+3. encryption and decryption
+	encryption_init()
+4. signal handling
+	sig_handler()
+	NOTE that the signal and exit status are output on the server side
+	the cliend should not know the reason of exit/error
+!!!!NOTE: the server should never set terminal modes
+	I included the set_input_mode() and reset_input_mode() in the server at first, and was stuck on the shell test for hours. Everything was solved after removing these functions from the server.
+
+Makefile
+all: compile lab1b-client.c and lab1b-server.c
+clean: clean all products of compilation
+dist: make the tarball
+
+my.key
+contains my 16-bit key to encryption
+
+README
+this file

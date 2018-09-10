@@ -1,0 +1,272 @@
+Total: 14 samples
+      12  85.7%  85.7%       14 100.0% thd
+       2  14.3% 100.0%        2  14.3% __strcmp_sse42
+       0   0.0% 100.0%        2  14.3% SortedList_insert
+       0   0.0% 100.0%       14 100.0% __clone
+       0   0.0% 100.0%       14 100.0% start_thread
+ROUTINE ====================== thd in /u/ch/ugrad/andyzhou/CS111/p2b/lab2_list.c
+    12     14 Total samples (flat / cumulative)
+     .      .   27: SortedList_t* sublist_arr;
+     .      .   28: SortedListElement_t* elements; 
+     .      .   29: 
+     .      .   30: char* table = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
+     .      .   31: 
+---
+     .      .   32: void* thd(void* argument){
+     .      .   33: 	int num_elements = num_threads * num_iterators;
+     .      .   34: 	int tid = *(int *)argument;
+     .      .   35: 	struct timespec start_thd;
+     .      .   36: 	struct timespec end_thd;
+     .      .   37: 
+     .      .   38: 	int i;
+     .      .   39: 	for(i = tid; i < num_elements; i+= num_threads)
+     .      .   40: 	{
+     .      .   41: 		switch(opt_sync)
+     .      .   42: 		{
+     .      .   43: 			case 'm':
+     .      .   44: 				clock_gettime(CLOCK_MONOTONIC, &start_thd);
+     .      .   45: 				pthread_mutex_lock(&mutex[hashtb[i]]);
+     .      .   46: 				clock_gettime(CLOCK_MONOTONIC, &end_thd);
+     .      .   47: 				SortedList_insert(&sublist_arr[ hashtb[i] ], &elements[i]);
+     .      .   48: 				delays[tid] += ((end_thd.tv_sec - start_thd.tv_sec) * 1000000000) + (end_thd.tv_nsec - start_thd.tv_nsec);
+     .      .   49: 				pthread_mutex_unlock(&mutex[hashtb[i]]);
+     .      .   50: 
+     .      .   51: 				break;
+     .      .   52: 			case 's':
+     .      .   53: 				clock_gettime(CLOCK_MONOTONIC, &start_thd);
+     9      9   54: 				while(__sync_lock_test_and_set(&spin_lock[hashtb[i]], 1))
+     .      .   55: 					{}; //spin
+     .      .   56: 				clock_gettime(CLOCK_MONOTONIC, &end_thd);
+     .      2   57: 				SortedList_insert(&sublist_arr[ hashtb[i] ], &elements[i]);
+     .      .   58: 				delays[tid] += ((end_thd.tv_sec - start_thd.tv_sec) * 1000000000) + (end_thd.tv_nsec - start_thd.tv_nsec);				
+     .      .   59: 				__sync_lock_release(&spin_lock[ hashtb[i] ]);
+     .      .   60: 
+     .      .   61: 				break;
+     .      .   62: 			default:
+     .      .   63: 				SortedList_insert(&sublist_arr[hashtb[i]], &elements[i]);
+     .      .   64: 		}
+     .      .   65: 	}
+     .      .   66: 
+     .      .   67: 	
+     .      .   68: 	for(i = 0; i < opt_list; i++)
+     .      .   69: 	{
+     .      .   70: 		switch(opt_sync)
+     .      .   71: 		{
+     .      .   72: 			case 'm':
+     .      .   73: 				clock_gettime(CLOCK_MONOTONIC, &start_thd);
+     .      .   74: 				pthread_mutex_lock(&mutex[i]);
+     .      .   75: 				clock_gettime(CLOCK_MONOTONIC, &end_thd);
+     .      .   76: 				length = length + SortedList_length(&sublist_arr[i]);
+     .      .   77: 				delays[tid] += ((end_thd.tv_sec - start_thd.tv_sec) * 1000000000) + (end_thd.tv_nsec - start_thd.tv_nsec);
+     .      .   78: 
+     .      .   79: 				pthread_mutex_unlock(&mutex[i]);
+     .      .   80: 				break;
+     .      .   81: 			case 's':
+     .      .   82: 				clock_gettime(CLOCK_MONOTONIC, &start_thd);
+     .      .   83: 				while(__sync_lock_test_and_set(&spin_lock[i], 1))
+     .      .   84: 					{}; //spin
+     .      .   85: 				clock_gettime(CLOCK_MONOTONIC, &end_thd);
+     .      .   86: 				length = length + SortedList_length(&sublist_arr[i]);
+     .      .   87: 				delays[tid] += ((end_thd.tv_sec - start_thd.tv_sec) * 1000000000) + (end_thd.tv_nsec - start_thd.tv_nsec);
+     .      .   88: 				
+     .      .   89: 				__sync_lock_release(&spin_lock[i]);
+     .      .   90: 
+     .      .   91: 				break;
+     .      .   92: 			default:
+     .      .   93: 				length = length + SortedList_length(&sublist_arr[i]);
+     .      .   94: 		}
+     .      .   95: 	}
+     .      .   96: 	
+     .      .   97: 
+     .      .   98: 	SortedListElement_t* t_key;
+     .      .   99: 	//int i;
+     .      .  100: 	for(i = tid; i < num_elements; i += num_threads)
+     .      .  101: 	{
+     .      .  102: 		switch(opt_sync)
+     .      .  103: 		{
+     .      .  104: 			case 'm':
+     .      .  105: 				clock_gettime(CLOCK_MONOTONIC, &start_thd);
+     .      .  106: 				pthread_mutex_lock(&mutex[hashtb[i]]);
+     .      .  107: 				clock_gettime(CLOCK_MONOTONIC, &end_thd);
+     .      .  108: 
+     .      .  109: 				t_key = SortedList_lookup(&sublist_arr[hashtb[i]], elements[i].key);
+     .      .  110: 				if (t_key == NULL)
+     .      .  111: 				{
+     .      .  112: 					fprintf(stderr, "Error: Key not in the list\n");
+     .      .  113: 					exit(2);
+     .      .  114: 				}
+     .      .  115: 				SortedList_delete(t_key);
+     .      .  116: 				delays[tid] += ((end_thd.tv_sec - start_thd.tv_sec) * 1000000000) + (end_thd.tv_nsec - start_thd.tv_nsec);
+     .      .  117: 
+     .      .  118: 				pthread_mutex_unlock(&mutex[hashtb[i]]);
+     .      .  119: 
+     .      .  120: 				break;
+     .      .  121: 			case 's':
+     .      .  122: 				clock_gettime(CLOCK_MONOTONIC, &start_thd);
+     3      3  123: 				while(__sync_lock_test_and_set(&spin_lock[hashtb[i]], 1))
+     .      .  124: 					{}; //spin
+     .      .  125: 				clock_gettime(CLOCK_MONOTONIC, &end_thd);
+     .      .  126: 
+     .      .  127: 				t_key = SortedList_lookup(&sublist_arr[hashtb[i]], elements[i].key);
+     .      .  128: 				if (t_key == NULL)
+     .      .  129: 				{
+     .      .  130: 					fprintf(stderr, "Error: Key not in the list\n");
+     .      .  131: 					exit(2);
+     .      .  132: 				}
+     .      .  133: 				SortedList_delete(t_key);
+     .      .  134: 				delays[tid] += ((end_thd.tv_sec - start_thd.tv_sec) * 1000000000) + (end_thd.tv_nsec - start_thd.tv_nsec);
+     .      .  135: 
+     .      .  136: 				__sync_lock_release(&spin_lock[hashtb[i]]);
+     .      .  137: 
+     .      .  138: 				break;
+     .      .  139: 			default:
+     .      .  140: 				t_key = SortedList_lookup(&sublist_arr[hashtb[i]], elements[i].key);
+     .      .  141: 				if (t_key == NULL)
+     .      .  142: 				{
+     .      .  143: 					fprintf(stderr, "Error: Key not in the list\n");
+     .      .  144: 					exit(2);
+     .      .  145: 				}
+     .      .  146: 				SortedList_delete(t_key);
+     .      .  147: 		}
+     .      .  148: 	}
+     .      .  149: 	return NULL;
+     .      .  150: }
+---
+     .      .  151: 
+     .      .  152: int main(int argc, char* argv[]){
+     .      .  153: 	
+     .      .  154: 	static struct option long_ops[] = {
+     .      .  155: 		{"threads", required_argument, NULL, 't'},
+ROUTINE ====================== thd in /u/ch/ugrad/andyzhou/CS111/p2b/lab2_list.c
+    12     14 Total samples (flat / cumulative)
+     .      .   27: SortedList_t* sublist_arr;
+     .      .   28: SortedListElement_t* elements; 
+     .      .   29: 
+     .      .   30: char* table = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
+     .      .   31: 
+---
+     .      .   32: void* thd(void* argument){
+     .      .   33: 	int num_elements = num_threads * num_iterators;
+     .      .   34: 	int tid = *(int *)argument;
+     .      .   35: 	struct timespec start_thd;
+     .      .   36: 	struct timespec end_thd;
+     .      .   37: 
+     .      .   38: 	int i;
+     .      .   39: 	for(i = tid; i < num_elements; i+= num_threads)
+     .      .   40: 	{
+     .      .   41: 		switch(opt_sync)
+     .      .   42: 		{
+     .      .   43: 			case 'm':
+     .      .   44: 				clock_gettime(CLOCK_MONOTONIC, &start_thd);
+     .      .   45: 				pthread_mutex_lock(&mutex[hashtb[i]]);
+     .      .   46: 				clock_gettime(CLOCK_MONOTONIC, &end_thd);
+     .      .   47: 				SortedList_insert(&sublist_arr[ hashtb[i] ], &elements[i]);
+     .      .   48: 				delays[tid] += ((end_thd.tv_sec - start_thd.tv_sec) * 1000000000) + (end_thd.tv_nsec - start_thd.tv_nsec);
+     .      .   49: 				pthread_mutex_unlock(&mutex[hashtb[i]]);
+     .      .   50: 
+     .      .   51: 				break;
+     .      .   52: 			case 's':
+     .      .   53: 				clock_gettime(CLOCK_MONOTONIC, &start_thd);
+     9      9   54: 				while(__sync_lock_test_and_set(&spin_lock[hashtb[i]], 1))
+     .      .   55: 					{}; //spin
+     .      .   56: 				clock_gettime(CLOCK_MONOTONIC, &end_thd);
+     .      2   57: 				SortedList_insert(&sublist_arr[ hashtb[i] ], &elements[i]);
+     .      .   58: 				delays[tid] += ((end_thd.tv_sec - start_thd.tv_sec) * 1000000000) + (end_thd.tv_nsec - start_thd.tv_nsec);				
+     .      .   59: 				__sync_lock_release(&spin_lock[ hashtb[i] ]);
+     .      .   60: 
+     .      .   61: 				break;
+     .      .   62: 			default:
+     .      .   63: 				SortedList_insert(&sublist_arr[hashtb[i]], &elements[i]);
+     .      .   64: 		}
+     .      .   65: 	}
+     .      .   66: 
+     .      .   67: 	
+     .      .   68: 	for(i = 0; i < opt_list; i++)
+     .      .   69: 	{
+     .      .   70: 		switch(opt_sync)
+     .      .   71: 		{
+     .      .   72: 			case 'm':
+     .      .   73: 				clock_gettime(CLOCK_MONOTONIC, &start_thd);
+     .      .   74: 				pthread_mutex_lock(&mutex[i]);
+     .      .   75: 				clock_gettime(CLOCK_MONOTONIC, &end_thd);
+     .      .   76: 				length = length + SortedList_length(&sublist_arr[i]);
+     .      .   77: 				delays[tid] += ((end_thd.tv_sec - start_thd.tv_sec) * 1000000000) + (end_thd.tv_nsec - start_thd.tv_nsec);
+     .      .   78: 
+     .      .   79: 				pthread_mutex_unlock(&mutex[i]);
+     .      .   80: 				break;
+     .      .   81: 			case 's':
+     .      .   82: 				clock_gettime(CLOCK_MONOTONIC, &start_thd);
+     .      .   83: 				while(__sync_lock_test_and_set(&spin_lock[i], 1))
+     .      .   84: 					{}; //spin
+     .      .   85: 				clock_gettime(CLOCK_MONOTONIC, &end_thd);
+     .      .   86: 				length = length + SortedList_length(&sublist_arr[i]);
+     .      .   87: 				delays[tid] += ((end_thd.tv_sec - start_thd.tv_sec) * 1000000000) + (end_thd.tv_nsec - start_thd.tv_nsec);
+     .      .   88: 				
+     .      .   89: 				__sync_lock_release(&spin_lock[i]);
+     .      .   90: 
+     .      .   91: 				break;
+     .      .   92: 			default:
+     .      .   93: 				length = length + SortedList_length(&sublist_arr[i]);
+     .      .   94: 		}
+     .      .   95: 	}
+     .      .   96: 	
+     .      .   97: 
+     .      .   98: 	SortedListElement_t* t_key;
+     .      .   99: 	//int i;
+     .      .  100: 	for(i = tid; i < num_elements; i += num_threads)
+     .      .  101: 	{
+     .      .  102: 		switch(opt_sync)
+     .      .  103: 		{
+     .      .  104: 			case 'm':
+     .      .  105: 				clock_gettime(CLOCK_MONOTONIC, &start_thd);
+     .      .  106: 				pthread_mutex_lock(&mutex[hashtb[i]]);
+     .      .  107: 				clock_gettime(CLOCK_MONOTONIC, &end_thd);
+     .      .  108: 
+     .      .  109: 				t_key = SortedList_lookup(&sublist_arr[hashtb[i]], elements[i].key);
+     .      .  110: 				if (t_key == NULL)
+     .      .  111: 				{
+     .      .  112: 					fprintf(stderr, "Error: Key not in the list\n");
+     .      .  113: 					exit(2);
+     .      .  114: 				}
+     .      .  115: 				SortedList_delete(t_key);
+     .      .  116: 				delays[tid] += ((end_thd.tv_sec - start_thd.tv_sec) * 1000000000) + (end_thd.tv_nsec - start_thd.tv_nsec);
+     .      .  117: 
+     .      .  118: 				pthread_mutex_unlock(&mutex[hashtb[i]]);
+     .      .  119: 
+     .      .  120: 				break;
+     .      .  121: 			case 's':
+     .      .  122: 				clock_gettime(CLOCK_MONOTONIC, &start_thd);
+     3      3  123: 				while(__sync_lock_test_and_set(&spin_lock[hashtb[i]], 1))
+     .      .  124: 					{}; //spin
+     .      .  125: 				clock_gettime(CLOCK_MONOTONIC, &end_thd);
+     .      .  126: 
+     .      .  127: 				t_key = SortedList_lookup(&sublist_arr[hashtb[i]], elements[i].key);
+     .      .  128: 				if (t_key == NULL)
+     .      .  129: 				{
+     .      .  130: 					fprintf(stderr, "Error: Key not in the list\n");
+     .      .  131: 					exit(2);
+     .      .  132: 				}
+     .      .  133: 				SortedList_delete(t_key);
+     .      .  134: 				delays[tid] += ((end_thd.tv_sec - start_thd.tv_sec) * 1000000000) + (end_thd.tv_nsec - start_thd.tv_nsec);
+     .      .  135: 
+     .      .  136: 				__sync_lock_release(&spin_lock[hashtb[i]]);
+     .      .  137: 
+     .      .  138: 				break;
+     .      .  139: 			default:
+     .      .  140: 				t_key = SortedList_lookup(&sublist_arr[hashtb[i]], elements[i].key);
+     .      .  141: 				if (t_key == NULL)
+     .      .  142: 				{
+     .      .  143: 					fprintf(stderr, "Error: Key not in the list\n");
+     .      .  144: 					exit(2);
+     .      .  145: 				}
+     .      .  146: 				SortedList_delete(t_key);
+     .      .  147: 		}
+     .      .  148: 	}
+     .      .  149: 	return NULL;
+     .      .  150: }
+---
+     .      .  151: 
+     .      .  152: int main(int argc, char* argv[]){
+     .      .  153: 	
+     .      .  154: 	static struct option long_ops[] = {
+     .      .  155: 		{"threads", required_argument, NULL, 't'},

@@ -1,0 +1,35 @@
+LAB 0:COPY FROM STDIN TO STDOUT WITH FILE DESCRIPTOR
+
+This submitted tarball contains 5 files:
+	lab0.c
+	Makefile
+	backtrace.png
+	breakpoint.png
+	README
+lab0.c is the source file of the program
+backtrace and breakpoint are two required screenshots of running lab0 on gdb
+
+----------------------------------------------------------------------------
+Smoke Test Specification
+
+In the check target of Makefile, 6 test cases are included.
+They are, respectively:
+	functionality test
+	input test
+	invalid argument test
+	non-existing input file test
+	unopenable output file test
+	SIGSEGV test
+-> functaionality test tests the overall functionality of the program
+	comparing the contents of input and output to make sure copy is done correctly
+	(correctly implements output and combined -- value feature)
+-> input test makes sure the input part of the program works out
+	(correctly implements input -- value feature)
+-> invalid argument test is corresponding to exit value 1,
+	making sure undefined argument is correctly handled
+-> non-existing input file test makes sure the program's feature of
+	"correctly handling of non-exisiting input file"
+-> unopenable output file test makes sure the program's feature of
+	"correctly handling of un-openable/creatable output file"
+-> SIGSEGV test makes sure segmentaional fault is caught and reported correctly
+	--segfault and --catch arguments are correctly inmplemented

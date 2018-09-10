@@ -1,0 +1,20 @@
+
+This tarball contains four files:
+lab3a.c
+ext2_fs.h
+Makefile
+README
+
+lab3a.c & ext2_fs.h:
+They are source files of this program.
+ext2_fs.h is the header file provided on spec. It contains several useful structs.
+lab3a.c is implemented to make a summary of a .img file based on EXT2 file system.
+It writes down the summary into a log.csv file, and also stream the summary to standard output.
+The format of the summary exactly follows the description on the spec.
+
+Makefile:
+This Makefile has three targets.
+They are default(compile), clean, and dist.
+
+README:
+This file.

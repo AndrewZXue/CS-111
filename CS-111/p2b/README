@@ -1,0 +1,53 @@
+
+This tarball contains:
+
+source files: 	lab2_list.c
+				Sortedlist.h
+				Sortedlist.c
+
+Makefile:		Makefile
+result files:	lab2_list.csv
+				profile.out
+				lab2_1.png
+				lab2_2.png
+				lab2_3.png
+				lab2_4.png
+				lab2_5.png
+
+helper files: 	tests.sh
+				lab2b_list.gp
+
+this file:		README
+
+
+lab2_list.c:
+The source for a C program that compiles cleanly (with no errors or warnings), and implements the specified command line options (--threads, --iterations, --yield, --sync, --lists), drives one or more parallel threads that do operations on a shared linked list, and reports on the final list and performance.
+
+Makefile:
+targets: default, tests, profile, graphs, dist, clean.
+
+tests.sh:
+help to create .csv file and test lab2_list.c.
+
+README:
+contains the answer to questions.
+
+2.3.1:
+a. They are spent in the sortedlist functions, such as insert and delete.
+b. Because the number of threads is small and the number of iterations is large. This results in trivial overheads, ie. time cost of waiting for a lock to be released.
+c. Most of time would be cost on spin. ie. waiting for the lock to be available again.
+d. Agian, most time would be cost for sortedlist functoions, because the waiting threads don't use CPU resource.
+
+2.3.2
+a. In lines of "while(__sync_lock_test_and_set(&spin_lock[hashtb[i]], 1))"
+b. The large number of threads creates vast overhead. Many threads will wait for one threads controlling the spin lock. These waiting threads will not give up the resource of CPU. On the contrary, they spin and keep checking the condition until the lock becomes available again. As a result, most of the cycles are wasted.
+
+2.3.3
+a. Because the more threads there are, the more will be competing for one lock. This means that the number of threads waiting for the lock increases, while that of threads occupying the lock remains the same.
+b. The times of context switches and lock availability check increase. The more threads contending for one lock, the more context switches CPU performs. The increase on these overheads add up to the completion time per operation.
+c. The completion time measure the time cost of the program as a whole. The wait time, on the other hand, includes the wall time of each individual thread. Multiple threads might have wait time in parallel, where the overlapping part would not show in completion time. Thus the wait time per operation is possible to go up fsater than the completion time.
+
+2.3.4
+a. As the number of sublists increases, the performance of synchronized methods increases with it.
+b. No. If we over-partition the list, the sublists would be too short. Therefore, the overhead of context switches are no more trivial towards the whole opertaion. The more sublists there are, the more context switches there are. Thus, the performance won't continue to increase, if we keep partitioning the list.
+c. No, partition a list creates shorter sublists. The shorter a sublist is, the less time would be cost in a critical section. Thus the less time would be wasted for a thread to wait for a lock's availability. As a result, an N-way partitioned list should have better performance.

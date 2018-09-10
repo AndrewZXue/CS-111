@@ -1,0 +1,68 @@
+This Tarball Contains Following files:
+
+lab2_add.c: parallel adding/deducting from shared data, with mutual exclusion options
+
+lab2_list.c: parallel update on a shared doubly-linked list among multiple threads, with mutual exclusion options.
+
+SortedList.h
+SortedList.c: implementing the functions to update the doubly-linked list
+
+Makefile: with five targets: all (compile), tests (generate .csv), graphs (generates .png), clean, and dist
+
+tests.sh: a test base for lab2_add and lab2_list
+
+helper files:
+	lab2_add.gp
+	lab2_list.gp
+
+.csv files:
+	lab2_add.csv
+	lab2_list.csv
+
+.png files:
+	5 for lab2_add
+	4 for lab2_list
+
+README file: with answers to th questions described in the project spec
+
+
+Answer To Questions
+
+Q 2.1.1
+A 1. Errors are detected during interrupts across critical sections.
+  More iterations indicate more instructions, which increases the chance of detecting an error.
+  2. Fewer iterations indicate fewer instructions. With fewer interrupts, the error is less easy to be detected.
+
+Q 2.1.2
+A 1. --yield forces a thread to give up CPU and wait for others to finish.
+  This approach includes context switch between threads, which brings in large overhead.
+  2. As explained above, it goes to overhead.
+  3. Apparently not.
+  4. Significant overheads are included in the calculation of performance time. They are too large to be ignored.
+
+Q 2.1.3
+A 1. The more iterations a thread have, the more instructions it will operate, which will make overhead more relatively trivial. Thus, average cost lowers down.
+  2. This could be achieved across tests on different iterations. Observe,
+  and we will find the optimal (aka correct) number of iterations.
+
+Q 2.1.4
+A 1. Less threads means less chance running into critical sections, which contributes to the major difference with the use of differnt wait policy or locks. Such chance being lower indicates a similar performance for all options.
+  2. Because, it is more likely to run into ciritical sections, while threads have to wait for the lock used by others.
+
+Q 2.2.1
+A In part 1, time cost increases as the number of threads increase, until it reaches 4,
+  In part 2, time cost consistently increases.
+  Reason: part 2 have much more complexity, so that each thread waits longer in front of a lock. On the other hand, part 1's performance is more affected by overheads
+
+Q 2.2.2
+A In both part 1 and part 2, time cost increases constantly with the increase of number of threads. The rate of increase is also steeper than that of mutex. This is due to spinning lock spends much more time spinning, which take the resource of CPU to check. More threads indicate more spinning occurance, which significatly slows the whole process down.
+
+
+
+
+
+
+
+
+
+

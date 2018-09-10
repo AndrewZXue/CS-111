@@ -1,0 +1,22 @@
+
+This tarball file contains three files.
+
+-------------------------------------------------------
+lab1a.c contains my source code. It includes three functions and a main function.
+reset_input_mode restores the default terminal mode.
+set_input_mode stores the current terminal mode, and sets it to non-canonical mode
+sig_handler handles certain signals potentially occur in the program
+
+main function judges the option of the command and responds respectively.
+Three mapping strategies are designed for three differnet situations: normal read and write, read(from 0) and write with shell, and read(from shell) and write with shell.
+
+The source code is commented for detailed understanding.
+
+---------------------------------------------------------
+Makefile has three targets: all, clean, and dist
+all: compile lab1a.c
+clean: remove any file constructed through Makefile
+dist: create the required tarball
+
+---------------------------------------------------------
+README: this file

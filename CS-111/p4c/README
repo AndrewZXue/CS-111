@@ -1,0 +1,31 @@
+
+Contents:
+This tarball contains four files:
+
+lab4c_tcp.c:
+lab4c_tls.c:
+The C source files for this program.
+Intended to be compile and run on the Beaglebone Green board, with Grove temperature sensor.
+The program supports --period/--scale/--log options (optional).
+The program also supports 6 functions:
+SCALE=F
+SCALE=C
+PERIOD=#
+STOP
+START
+OFF
+The program requires a hostname and a port number to set up connection with the server.
+It also supports an indentifiaction input.
+Runtime input is realized through poll(2) and input buffer.
+
+Makefile:
+This make file includes 3 targets:
+default: compile the code
+clean: remove files produced at compilation and runtime
+dist: make the tar ball
+
+README: 
+this file.
+
+Note:
+My temperature sensor is connected to AIN0.
